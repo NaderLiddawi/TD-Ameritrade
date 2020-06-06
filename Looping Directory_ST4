@@ -1,0 +1,84 @@
+Sub St4()
+    
+    Dim MyFolder As String
+    Dim MyFile As String
+    Dim wbk As Workbook
+    Dim path As String
+    Dim strInput As String
+    On Error Resume Next
+            
+    Application.ScreenUpdating = False
+    
+
+    With Application.FileDialog(msoFileDialogFilePicker)          'open dialog
+            .InitialFileName = "U:\FuturesClearing\GMIreports"
+            '.InitialFileName = "H:\st4 testing"
+            .Title = "Please select ST4 file"
+            .Show
+            .AllowMultiSelect = False
+    End With
+         
+        MyFolder = Application.SelectedItems(1) & "\"  'my folder is whatever was selected above
+        
+        MyFile = Dir(MyFolder)                         'my file is contained within folder path
+           
+        
+        If MsgBox("Do you wish to run the ST4 macro?", vbYesNo) = vbNo Then Exit Sub
+     
+        strInput = InputBox("Please enter account for which you want monthly ST4 data")
+        
+        'If strInput <> "" Then
+        
+        'strInput2 = InputBox("Please enter another account for which you want monthly ST4 data")
+        
+        
+        
+    Do While MyFile <> ""
+           
+        Set wbk = Workbooks.Open(Filename:=MyFolder & MyFile)
+    
+        Selection.AutoFilter                                                                'auto filter and select appropriate account
+        
+        ActiveSheet.Range("$A$1:$ZZ$1000000").AutoFilter Field:=4, Criteria1:= _
+           strInput
+        
+        Cells.Select
+        Application.CutCopyMode = False
+        Selection.Copy
+        
+        Workbooks.Add
+        
+        ActiveSheet.Paste Destination:=Worksheets("Sheet1").Range("A1")
+        
+        path = "U:\FuturesClearing\Natalie\" & strInput & " -" & " "
+        
+        If Range("D2").Value = "" And Range("D3").Value = "" And Range("D4").Value = "" Then
+        
+        
+        ActiveWorkbook.Close savechanges:=False
+        
+        Else
+        
+        Application.ActiveWorkbook.SaveAs Filename:=path & MyFile
+        
+        End If
+        
+        '& ".xlsx", FileFormat:=xlOpenXMLWorkbook
+        Application.DisplayAlerts = False
+        
+        ActiveWorkbook.Close                        'close saved file that contains account st4 data
+            
+        wbk.Close                                    'close st4 file without saving
+        
+        Application.DisplayAlerts = True
+        
+        MyFile = Dir
+        
+        
+    Loop
+    
+        Application.ScreenUpdating = True
+    
+        MsgBox ("ST4 Files Saved for " & strInput & ": FuturesClearing\Natalie")
+        
+    End Sub
