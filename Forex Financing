@@ -1,0 +1,595 @@
+Sub FX_MAGIC()
+    
+    ChDrive "U"                                                      'change current drive to U drive
+    
+    ChDir "U:\FuturesClearing\FX_Books_Reports\Financing"            'set the default directory
+    
+    fxData = Application.GetOpenFilename(, , "Browse for FX Data")   'browse directory and manually select today's FX rates data
+
+
+    If fxData = False Then                                               'exit sub procedure in event browsing window is cancelled
+        MsgBox ("No file selected")
+        Exit Sub
+    End If
+    
+    Application.ScreenUpdating = False                               'disable screen updating
+    Workbooks.Open fxData                                            'open the selected workbook
+        
+    Dim gain As Workbook: Set gain = ActiveWorkbook
+     
+    Cells.Select                                                     'Select all cells in opened FX data worksheet
+    Selection.Copy                                                   'copy them
+    Windows("Forex Financing Template.xlsm").Activate                'activate this forex template (macro)
+    Sheets("Sheet2").Select                                          'select its Sheet2
+    ActiveSheet.Paste Destination:=Worksheets("Sheet2").Range("A1")  'paste data to A1
+    
+    Application.CutCopyMode = False                                  'clear clipboard
+    gain.Close savechanges:=False                                    'close FX report without saving
+    
+'_______________________________________________________________________
+
+'carry out copy-and-paste procedure below
+
+    
+    Dim Report As Worksheet
+    Dim Table As Worksheet
+    
+    Set Report = Workbooks("Forex Financing Template").Sheets("Sheet2")
+    Set Table = Workbooks("Forex Financing Template").Sheets("Sheet1")
+    
+    
+  
+    If UCase(Report.Range("D1").Value) <> "QUOTEBID" Or _
+       UCase(Report.Range("E1").Value) <> "BASEASK" Or _
+       UCase(Report.Range("F1").Value) <> "QUOTEASK" Or _
+       UCase(Report.Range("G1").Value) <> "BASEBID" Then
+       
+        MsgBox "Bid/Quote columns out of range", vbCritical, "FX Report Reformatted"
+        Exit Sub
+        
+    End If
+                                                                     'check if conditionals are met; if so transfer data; if not, exit code and prompt user to reformatting error
+      
+       
+       
+    If UCase(Report.Range("A2").Value) = "AUD/CAD" Then
+    
+        Table.Range("B17").Value = Report.Range("G2").Value
+        Table.Range("C17").Value = Report.Range("E2").Value
+        
+    Else
+    
+        MsgBox "AUD/CAD out of range", vbCritical, "FX Report Reformatted"
+        Exit Sub
+        
+    End If
+    
+           
+        
+    If UCase(Report.Range("A40").Value) = "EUR/CAD" Then
+    
+        Table.Range("B18").Value = Report.Range("D40").Value
+        Table.Range("C18").Value = Report.Range("F40").Value
+        
+    Else
+    
+        MsgBox "EUR/CAD out of range", vbCritical, "FX Report Reformatted"
+        Exit Sub
+        
+    End If
+       
+       
+       
+       
+    If UCase(Report.Range("A28").Value) = "CHF/HUF" Then
+    
+        Table.Range("B19").Value = Report.Range("G28").Value
+        Table.Range("C19").Value = Report.Range("E28").Value
+        
+    Else
+    
+        MsgBox "CHF/HUF out of range", vbCritical, "FX Report Reformatted"
+        Exit Sub
+        
+    End If
+      
+       
+       
+       
+    If UCase(Report.Range("A76").Value) = "EUR/USD" Then
+    
+        Table.Range("B22").Value = Report.Range("G76").Value
+        Table.Range("C22").Value = Report.Range("E76").Value
+        
+    Else
+    
+        MsgBox "EUR/USD out of range", vbCritical, "FX Report Reformatted"
+        Exit Sub
+        
+    End If
+         
+       
+       
+    If UCase(Report.Range("A104").Value) = "GBP/USD" Then
+    
+        Table.Range("B23").Value = Report.Range("G104").Value
+        Table.Range("C23").Value = Report.Range("E104").Value
+        
+    Else
+    
+        MsgBox "GBP/USD out of range", vbCritical, "FX Report Reformatted"
+        Exit Sub
+    End If
+    
+    
+    
+    
+    If UCase(Report.Range("A122").Value) = "NZD/USD" Then
+    
+        Table.Range("B33").Value = Report.Range("G122").Value
+        Table.Range("C33").Value = Report.Range("E122").Value
+        
+    Else
+    
+        MsgBox "NZD/USD out of range", vbCritical, "FX Report Reformatted"
+        Exit Sub
+    End If
+    
+    
+    
+    
+    If UCase(Report.Range("A77").Value) = "EUR/USD" Then
+    
+        Table.Range("B42").Value = Report.Range("D77").Value
+        Table.Range("C42").Value = Report.Range("F77").Value
+        
+    Else
+    
+        MsgBox "EUR/USD out of range", vbCritical, "FX Report Reformatted"
+        Exit Sub
+    End If
+    
+    
+    
+        
+    If UCase(Report.Range("A122").Value) = "NZD/USD" Then
+    
+        Table.Range("B33").Value = Report.Range("G122").Value
+        Table.Range("C33").Value = Report.Range("E122").Value
+        
+    Else
+    
+        MsgBox "NZD/USD out of range", vbCritical, "FX Report Reformatted"
+        Exit Sub
+    End If
+       
+        
+        
+        
+    If UCase(Report.Range("A136").Value) = "USD/CZK" Then
+    
+        Table.Range("B20").Value = Report.Range("D136").Value
+        Table.Range("C20").Value = Report.Range("F136").Value
+        
+    Else
+    
+        MsgBox "USD/CZK out of range", vbCritical, "FX Report Reformatted"
+        Exit Sub
+    End If
+        
+        
+        
+    If UCase(Report.Range("A138").Value) = "USD/DKK" Then
+    
+        Table.Range("B21").Value = Report.Range("D138").Value
+        Table.Range("C21").Value = Report.Range("F138").Value
+        
+    Else
+    
+        MsgBox "USD/DKK out of range", vbCritical, "FX Report Reformatted"
+        Exit Sub
+    End If
+        
+               
+    
+    If UCase(Report.Range("A140").Value) = "USD/HKD" Then
+    
+        Table.Range("B24").Value = Report.Range("D140").Value
+        Table.Range("C24").Value = Report.Range("F140").Value
+        
+    Else
+    
+        MsgBox "USD/HKD out of range", vbCritical, "FX Report Reformatted"
+        Exit Sub
+    End If
+    
+    
+    
+    If UCase(Report.Range("A142").Value) = "USD/HUF" Then
+    
+        Table.Range("B25").Value = Report.Range("D142").Value
+        Table.Range("C25").Value = Report.Range("F142").Value
+        
+    Else
+    
+        MsgBox "USD/HUF out of range", vbCritical, "FX Report Reformatted"
+        Exit Sub
+    End If
+    
+    
+    
+    
+    If UCase(Report.Range("A144").Value) = "USD/ILS" Then
+    
+        Table.Range("B26").Value = Report.Range("D144").Value
+        Table.Range("C26").Value = Report.Range("F144").Value
+        
+    Else
+    
+        MsgBox "USD/ILS out of range", vbCritical, "FX Report Reformatted"
+        Exit Sub
+    End If
+    
+    
+    
+    
+    If UCase(Report.Range("A146").Value) = "USD/JPY" Then
+    
+        Table.Range("B28").Value = Report.Range("D146").Value
+        Table.Range("C28").Value = Report.Range("F146").Value
+        
+    Else
+    
+        MsgBox "USD/JPY out of range", vbCritical, "FX Report Reformatted"
+        Exit Sub
+    End If
+    
+    
+    
+    
+    If UCase(Report.Range("A148").Value) = "USD/MXN" Then
+    
+        Table.Range("B31").Value = Report.Range("D148").Value
+        Table.Range("C31").Value = Report.Range("F148").Value
+        
+    Else
+    
+        MsgBox "USD/MXN out of range", vbCritical, "FX Report Reformatted"
+        Exit Sub
+    End If
+        
+        
+    
+    If UCase(Report.Range("A150").Value) = "USD/NOK" Then
+    
+        Table.Range("B32").Value = Report.Range("D150").Value
+        Table.Range("C32").Value = Report.Range("F150").Value
+        
+    Else
+    
+        MsgBox "USD/NOK out of range", vbCritical, "FX Report Reformatted"
+        Exit Sub
+    End If
+    
+    
+    
+    
+    If UCase(Report.Range("A152").Value) = "USD/PLN" Then
+    
+        Table.Range("B34").Value = Report.Range("D152").Value
+        Table.Range("C34").Value = Report.Range("F152").Value
+        
+    Else
+    
+        MsgBox "USD/PLN out of range", vbCritical, "FX Report Reformatted"
+        Exit Sub
+    End If
+    
+    
+        
+    If UCase(Report.Range("A158").Value) = "USD/SEK" Then
+    
+        Table.Range("B37").Value = Report.Range("D158").Value
+        Table.Range("C37").Value = Report.Range("F158").Value
+        
+    Else
+    
+        MsgBox "USD/SEK out of range", vbCritical, "FX Report Reformatted"
+        Exit Sub
+    End If
+    
+        
+         
+    If UCase(Report.Range("A160").Value) = "USD/SGD" Then
+    
+        Table.Range("B38").Value = Report.Range("D160").Value
+        Table.Range("C38").Value = Report.Range("F160").Value
+        
+    Else
+    
+        MsgBox "USD/SGD out of range", vbCritical, "FX Report Reformatted"
+        Exit Sub
+    End If
+    
+    
+    
+        
+    If UCase(Report.Range("A162").Value) = "USD/THB" Then
+    
+        Table.Range("B40").Value = Report.Range("D162").Value
+        Table.Range("C40").Value = Report.Range("F162").Value
+        
+    Else
+    
+        MsgBox "USD/THB out of range", vbCritical, "FX Report Reformatted"
+        Exit Sub
+    End If
+    
+    
+    
+         
+    If UCase(Report.Range("A164").Value) = "USD/TRY" Then
+    
+        Table.Range("B41").Value = Report.Range("D164").Value
+        Table.Range("C41").Value = Report.Range("F164").Value
+        
+    Else
+    
+        MsgBox "USD/TRY out of range", vbCritical, "FX Report Reformatted"
+        Exit Sub
+    End If
+    
+    
+    
+        
+    If UCase(Report.Range("A166").Value) = "USD/ZAR" Then
+    
+        Table.Range("B43").Value = Report.Range("D166").Value
+        Table.Range("C43").Value = Report.Range("F166").Value
+        
+    Else
+    
+        MsgBox "USD/ZAR out of range", vbCritical, "FX Report Reformatted"
+        Exit Sub
+    End If
+    
+           
+    Application.CutCopyMode = False
+    
+    
+    Table.Select
+
+'_____________________________________________________________
+
+    If Weekday(Now()) = vbWednesday Then                                            'multiply overnight rates by 3 on Wednesdays to account for weekend (interest) financing
+
+        Call Multiply_3
+
+    End If
+'______________________________________________________________
+
+
+    Application.ScreenUpdating = True
+    Application.ScreenUpdating = False
+
+
+
+
+'save templates and email rates change
+
+
+        Dim myDate As String                                                                     'declare string variables
+        Dim myPath As String
+        Dim lastEmailRow As Long
+                                                                                                
+        myDate = Format(Now(), "MM-DD-YYYY")                                                                        'set variable to current date and path (initialization)
+        myPath = "U:\FuturesClearing\Forex Daily Financing\"
+    
+    
+        Workbooks.Open filename:=myPath & "Templates\overnight_rate_template.xlsx"              'open overnight rate template from shared drive
+       
+        Windows("Forex Financing Template.xlsm").Activate                                                                       'activate FX Template
+     
+     
+      
+     
+    
+    If Weekday(Now()) = vbWednesday Then                                                                                        'if Wednesday, copy cells multiplied by 3
+        
+        Range("L16:M43").Select
+        Selection.Copy
+        
+        Windows("overnight_rate_template").Activate
+        Range("B1").Select
+        Selection.PasteSpecial Paste:=xlPasteValuesAndNumberFormats, Operation:= _
+            xlNone, SkipBlanks:=False, Transpose:=False                                                                         'paste special, without formulas into overnight template (B1)
+        
+    
+     Else                                                                                                                       'if not Wednesday, copy cells without any multiple
+        
+        Range("J16:K43").Select
+        Selection.Copy
+        
+        Windows("overnight_rate_template").Activate
+        Range("B1").Select
+        Selection.PasteSpecial Paste:=xlPasteValuesAndNumberFormats, Operation:= _
+            xlNone, SkipBlanks:=False, Transpose:=False                                                                         'paste onto overnight template
+        
+     End If
+
+        
+        ActiveWorkbook.SaveAs filename:=myPath & "overnight_rate_template " & myDate & ".csv", FileFormat:=xlCSV          'save overnight rates excel , as comma separated values file
+                                                                                                                            'to be imported into Admin: Position Adjustment
+        ActiveWorkbook.Close savechanges:=False                                                                             'close workbook without prompt
+                                                                                                                         
+                                                    
+        Windows("Forex Financing Template.xlsm").Activate                                                        'activate macro book and copy FX rates before markup
+        Range("B16:C43").Select
+        Selection.Copy
+        
+         
+        Workbooks.Open filename:=myPath & "Templates\rates_change_template.xlsx" 'open rates change template to paste what was copied above
+                                                               
+     
+        Range("K1:L28").Select                                                                                   'select this range for today's FX data in the rates change template
+        Selection.PasteSpecial Paste:=xlPasteValuesAndNumberFormats, Operation:= _
+            xlNone, SkipBlanks:=False, Transpose:=False                                                          'paste here FX rates from today's overnight template
+            
+                 
+        Range("E1:F28").Select                                                                                   'select and copy yesterday's FX data
+        Selection.Copy
+      
+        Range("B1:C28").Select                                                                                   'move yesterday's new data over to the left
+        Selection.PasteSpecial Paste:=xlPasteValuesAndNumberFormats, Operation:= _
+            xlNone, SkipBlanks:=False, Transpose:=False
+      
+      
+        Range("K1:L28").Select
+        Selection.Copy                                                                                     'copy today's FX data, pasted before to K1:L28
+      
+        Range("E1:F28").Select
+        Selection.PasteSpecial Paste:=xlPasteValuesAndNumberFormats, Operation:= _
+            xlNone, SkipBlanks:=False, Transpose:=False                                                          'move them to where yesterday's new data was
+      
+      
+        Range("K1:L28").ClearContents                                                                            'clear contents of cells used temporarily
+                                                         
+    
+        ActiveWorkbook.Save
+        Range("H1:I28").Select
+        Selection.Copy                                              'copy rates change, representing rate change day over day _
+                                                                    with following number format: 0.####;–0.####;0;@
+        
+        Workbooks.Open filename:=myPath & "Templates\daily_fx_rates_change.xlsx"
+           
+        Dim fx_daily As Workbook: Set fx_daily = ActiveWorkbook
+        
+        
+        
+        Range("B2").Select
+        Selection.PasteSpecial Paste:=xlPasteValuesAndNumberFormats, Operation:= _
+            xlNone, SkipBlanks:=False, Transpose:=False
+        Range("A2").Select
+        
+        
+        
+        lastEmailRow = Range("A" & Rows.Count).End(xlUp).Row
+        
+        Range("A1:C" & lastEmailRow).Select
+            
+        Range("A1:C" & lastEmailRow).Copy
+            
+        
+             
+'_______________________________________________________________________________
+
+    
+        Dim outlook As Object
+        Dim newEmail As Object
+        Dim xInspect As Object
+        Dim pageEditor As Object
+    
+    
+        Set outlook = CreateObject("Outlook.Application")
+        Set newEmail = outlook.CreateItem(0)
+        
+        Application.ScreenUpdating = False
+        
+        With newEmail
+            .To = "FuturesClearing@tdameritrade.com"
+            .CC = ""
+            .BCC = ""
+            .Subject = "Daily Forex Rates Change " & myDate
+            .Body = "Daily FX Rates Change for " & myDate & " has generated below." & vbCrLf & vbCrLf & "Thank you"
+            '.Attachments.Add ActiveWorkbook.FullName
+            .display
+            
+            Set xInspect = newEmail.GetInspector
+            Set pageEditor = xInspect.WordEditor
+            
+                   
+            pageEditor.Application.Selection.Start = Len(.Body)
+            pageEditor.Application.Selection.End = pageEditor.Application.Selection.Start
+            pageEditor.Application.Selection.PasteAndFormat (wdFormatPlainText)
+            .display
+            .send
+            Set pageEditor = Nothing
+            Set xInspect = Nothing
+        
+        End With
+        On Error GoTo 0
+    
+        Application.ScreenUpdating = False
+    
+        Set newEmail = Nothing
+        Set outlook = Nothing
+             
+             
+        fx_daily.SaveAs filename:=myPath & "Daily Rates Change\rates_change " & myDate & ".xlsx"    'and save it as today's date into shared drive under its folder
+        
+ '______________________________________________
+ 
+    'Begin to save files to shared drive
+        
+        fx_daily.Close savechanges:=False
+        Windows("rates_change_template.xlsx").Close
+        
+        
+        Workbooks.Open filename:=myPath & "Templates\VWAP Template.xlsx"                     'open VWAP template
+        ActiveWorkbook.SaveAs filename:=myPath & "VWAP Template " & myDate & ".xlsx"         'save vwap template as today's date into shared drive
+        ActiveWindow.Close                                                                   'close workbook for later use
+        
+        
+        Workbooks.Open filename:=myPath & "Templates\financing_profile_all_template.xlsx"                                     'open fx profile_all template
+        ActiveWorkbook.SaveAs filename:=myPath & "financing_profile_all_template " & myDate & ".csv", FileFormat:=xlCSV       'save file in csv format with today's date
+        ActiveWindow.Close savechanges:=False                                                                                 'close workbook for later use
+        
+        Windows("Forex Financing Template.xlsm").Activate                                                  'activate FX financing template
+        Range("A3").Select
+        Range("A3").Value = Format(Now(), "MM/DD/YYYY")                                                    'replace function with today's (constant) date
+                                                                         
+        Application.DisplayAlerts = False
+        ActiveWorkbook.SaveAs filename:=myPath & "Forex Financing Template " & myDate & ".xlsx", FileFormat:=xlOpenXMLWorkbook
+        'save excel into Daily Financing folder with today's date, separate from the original macro template in .xlsx format
+        Application.DisplayAlerts = True
+                                                               
+        Table.Select
+        
+            
+         
+       
+ '____________________________________________________
+    
+    
+        If Weekday(Now()) = vbWednesday Then                         'if today is Wednesday, notify that 3x multiple rates are saved
+        
+            MsgBox ("Wednesday 3x rates saved")
+        
+        End If
+     
+    
+'___________________________________________________
+    
+    'check conditionals
+    
+       Dim iRow As Range, cell As Range, conditionMet As Boolean        'declare boolean
+       conditionMet = False
+       Set iRow = Range("J16:M43")
+       For Each cell In iRow
+           If cell.Value >= 1 Then                                   'if condition of >= 100% (or 1) is met after FX markup, then shade red and alert user to review
+               cell.Interior.Color = 255
+               conditionMet = True
+           End If
+       Next
+       If conditionMet Then
+           MsgBox ("Please review: Rates exceed 100%")
+       Else
+           MsgBox ("Overnight Rates may now be imported into Admin :) ")          'otherwise, advise user to import csv file into Admin
+       End If
+    
+    
+    Application.ScreenUpdating = True
+        
+    
+
+End Sub
