@@ -1,0 +1,73 @@
+Sub TDA_BrokeragetoFutures()
+      
+          
+      Worksheets("TDA - BOS to Futures").Activate
+           
+      
+      Dim myfile As String, mypath As String, mycount As Integer, mydate As String
+     
+      
+      mydate = Format(Now(), "MM-DD-YYYY")
+      
+      mypath = "U:\FuturesClearing\Wires\Futures Wires Email Templates\"
+           
+      Call Trim_Function
+      
+      Selection.Copy
+      
+      
+  With Selection.Interior
+        .Pattern = xlSolid
+        .PatternColorIndex = xlAutomatic
+        .Color = 10092543
+        .TintAndShade = 0
+        .PatternTintAndShade = 0
+  End With
+      
+      
+      Workbooks.Open Filename:="U:\FuturesClearing\Wires\Futures Wires Email Templates\Templates\Brokerage to Futures TDA.xlsx"
+      
+      
+      Range("A2").PasteSpecial (xlPasteValuesAndNumberFormats)
+      
+  Do
+          mycount = mycount + 1
+          myfile = mypath & "Manual Futures Transfer Request " & mydate & " #" & mycount & " Brokerage to Futures TDA.xlsx"
+            
+  Loop Until Dir(myfile) = ""
+
+      
+         
+      ActiveWorkbook.SaveAs Filename:=myfile
+      
+                  
+          
+      Dim OutApp As Object
+      Dim OutMail As Object
+
+      Set OutApp = CreateObject("Outlook.Application")
+      Set OutMail = OutApp.CreateItem(0)
+
+      On Error Resume Next
+      
+  With OutMail
+        .to = "FuturesClearing@tdameritrade.com"
+        .CC = ""
+        .BCC = ""
+        .Subject = "Manual Futures Transfer Request " & mydate & " #" & mycount & " Brokerage to Futures TDA"
+        .Body = "Brokerage/futures account association(s) confirmed, no dupes."
+        .Attachments.Add ActiveWorkbook.FullName
+        .Send
+  End With
+  
+      On Error GoTo 0
+
+      Set OutMail = Nothing
+      Set OutApp = Nothing
+    
+    
+
+      ActiveWorkbook.Close
+      
+
+End Sub
