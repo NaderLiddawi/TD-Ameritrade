@@ -1,0 +1,785 @@
+Sub Morning_Wires()
+
+    Dim WireTemplate As Workbook: Set WireTemplate = ThisWorkbook
+    
+    Dim wbGMItemplate As Workbook
+    Dim wbCSV As Workbook
+    Dim wbCashUpload As Workbook
+    Dim wbGMIreport As Workbook
+    Dim wbBOS7140 As Workbook
+    Dim wbBOS7143 As Workbook
+    Dim wbDebitSweep As Workbook
+    Dim wbFuturesDaily As Workbook
+    Dim ADMIS As Workbook
+    Dim FUTBAL As Workbook
+    
+ 
+    
+    Dim mydate As String
+    Dim mydate2 As String
+    Dim mydate3 As String
+    Dim mydate4 As String
+    Dim mydate5 As String
+    Dim bosDate As String
+    
+    Dim mondayDate As String
+    Dim mondayDate2 As String
+    Dim mondayDate3 As String
+    Dim mondayDate4 As String
+    Dim mondayDate5 As String
+
+    
+    mydate = Format(Now(), "MMDDYYYY")
+    mondayDate = Format(Now() - 3, "MMDDYYYY")
+    
+    mydate2 = Format(Now(), "MM-DD-YYYY")
+    mondayDate2 = Format(Now() - 2, "MM-DD-YYYY")
+    
+    mydate3 = Format(Now() - 1, "YYYYMMDD")
+    mondayDate3 = Format(Now() - 3, "YYYYMMDD")
+    
+    mydate4 = Format(Now() - 1, "MM-DD-YYYY")
+    mondayDate4 = Format(Now() - 3, "MM-DD-YYYY")
+    
+    mydate5 = Format(Now() - 1, "YYYY-MM-DD")
+    mondayDate5 = Format(Now() - 3, "YYYY-MM-DD")
+    
+    bosDate = Format(Now(), "YYYYMMDD")
+    
+    
+'_________________________________________________________________________
+    
+'Debit Sweep Report
+    
+    Application.ScreenUpdating = False
+    
+    Dim lastrow As Long
+    Dim NewLastRow As Long
+    Dim i As Long
+    
+    
+    If Weekday(Now(), vbMonday) = 1 Then
+    
+        Set wbDebitSweep = Application.Workbooks.Open("U:\FuturesClearing\Wires\Futures Wires Email Templates\Morning Wires\Debit Sweep Report " & mondayDate2 & ".xlsx")
+    Else
+        Set wbDebitSweep = Application.Workbooks.Open("U:\FuturesClearing\Wires\Futures Wires Email Templates\Morning Wires\Debit Sweep Report " & mydate2 & ".xlsx")
+        
+    End If
+    
+    
+    If UCase(Range("A2").Value) <> "DEBITS" Or UCase(Range("A3").Value) <> "TDA ACCOUNT" Or UCase(Range("B3").Value) <> "AMOUNT" Or UCase(Range("C3").Value) <> "FUTURES ACCT" _
+        Or UCase(Range("E3").Value) <> "TRAN TYPE" Or UCase(Range("E10").Value) <> "DEBIT" Then
+        
+            MsgBox "Cannot Continue: Debit Sweep Report Reformatted", vbCritical, "Error"
+            Exit Sub
+    End If
+     
+    
+    lastrow = Cells(Rows.Count, "A").End(xlUp).Row
+    
+      
+    For i = lastrow To 10 Step -1                            'delete non-numeric rows
+         
+        If Not IsNumeric(Range("A" & i).Value) Then
+        
+            Rows(i).EntireRow.Delete
+            
+        End If
+    Next
+    
+    
+    Columns("A").SpecialCells(xlCellTypeBlanks).EntireRow.Delete
+    
+     
+    NewLastRow = Cells(Rows.Count, "A").End(xlUp).Row        'set new count after non-numeric and empty rows are deleted
+    
+    
+    Range("A1:E" & NewLastRow).Select
+    
+    Selection.Copy
+    
+    
+'____________________________________________________________________
+
+'GMI recon file template
+    
+    
+    Set wbGMItemplate = Application.Workbooks.Open("U:\FuturesClearing\Macro\Wire Macros\GMI recon fileTEMP.xls")      'open gmi template
+    
+    Application.DisplayAlerts = False
+    
+    
+    wbGMItemplate.Sheets(1).Range("A1").PasteSpecial Paste:=xlPasteValuesAndNumberFormats
+    
+    Application.CutCopyMode = False
+
+    
+    wbDebitSweep.Close savechanges:=False
+    
+    
+    Application.DisplayAlerts = True
+    
+    wbGMItemplate.Activate
+    
+    
+    If UCase(Range("F3").Value) <> "OFFICE" Or UCase(Range("G3").Value) <> "ACCOUNT" Or UCase(Range("H3").Value) <> "AMOUNT" Then
+            MsgBox "Cannot Continue: GMI recon fileTEMP reformatted", vbCritical, "Error"
+            Exit Sub
+    End If
+        
+    
+    Range("F4:H4").Select
+    
+    
+    Selection.AutoFill Destination:=Range("F4:H" & NewLastRow), Type:=xlFillDefault       'autofill formula in gmi template
+        
+    
+    Range("F4:H" & NewLastRow).Select
+    
+    Selection.Copy
+    
+    
+'_______________________________________________________________________
+
+'save cashload as CSV
+    
+    Application.DisplayAlerts = False
+    
+    Set wbCSV = Workbooks.Add
+    
+    Range("A1").Select
+     
+    Selection.PasteSpecial Paste:=xlPasteValuesAndNumberFormats, Operation:= _
+        xlNone, SkipBlanks:=False, Transpose:=False
+    
+    Application.CutCopyMode = False
+
+    wbCSV.SaveAs Filename:="U:\FuturesClearing\Macro\Wire Macros\cashload" & mydate & ".csv", FileFormat:=xlCSV      'save as csv
+    
+    
+    Range("B1:B" & NewLastRow).Select
+    
+    
+    With Selection
+        .NumberFormat = "General"
+        .Value = .Value
+        .HorizontalAlignment = xlRight
+    End With
+     
+    
+    Range("A1:C" & NewLastRow).Select
+    
+    Selection.Copy
+    
+    wbGMItemplate.Close savechanges:=False
+    
+    Application.DisplayAlerts = True
+      
+'_______________________________________________________
+    
+'CashUpload Template
+       
+       
+    Set wbCashUpload = Application.Workbooks.Open("U:\FuturesClearing\Macro\Wire Macros\Cash Upload Cust vs NonCust Template v.2" & ".xlsx")
+    
+    
+    If UCase(Range("A1").Value) <> "YACCT" Or UCase(Range("B1").Value) <> "YRR" Or UCase(Range("C1").Value) <> "YCLASS" Then
+            
+            MsgBox "Cannot Continue: Cash Upload Cust vs NonCust Template v.2 Reformatted", vbCritical, "Error"
+            Exit Sub
+    End If
+    
+    
+    Range("E2:G" & NewLastRow).PasteSpecial Paste:=xlPasteValuesAndNumberFormats
+    
+    
+    Application.CutCopyMode = False
+    
+    Application.DisplayAlerts = False
+    
+    wbCSV.Activate
+    
+    Range("B1:B" & NewLastRow).Select
+    
+    
+    With Selection
+        .NumberFormat = "00000"
+        .Value = .Value
+    End With
+    
+    wbCSV.Save       'save as text file
+    
+    wbCSV.Close savechanges:=False
+    Application.DisplayAlerts = True
+    
+'________________________________________________________
+
+'GMI Futures Account Master report (large data set)
+    
+    
+    If Weekday(Now(), vbMonday) = 1 Then
+        Set wbGMIreport = Application.Workbooks.Open("U:\FuturesClearing\GMIreports\GMIFUTACCTMASTER_" & mondayDate3 & ".csv")
+    
+    Else
+        Set wbGMIreport = Application.Workbooks.Open("U:\FuturesClearing\GMIreports\GMIFUTACCTMASTER_" & mydate3 & ".csv")
+    End If
+    
+    
+    If UCase(Range("D1").Value) <> "YACCT" Or UCase(Range("E1").Value) <> "YRR" Or UCase(Range("F1").Value) <> "YCLASS" Then
+    
+            MsgBox "Cannot Continue: GMI Futures Master Report Reformatted", vbCritical
+            Exit Sub
+    End If
+    
+    
+    Range("D:F").Select
+    
+    Selection.Copy
+    
+    wbCashUpload.Activate
+    
+    Application.DisplayAlerts = False
+    Range("A1").PasteSpecial xlPasteValues
+    Application.CutCopyMode = False
+
+    
+    wbGMIreport.Close savechanges:=False
+    Application.DisplayAlerts = True
+    
+'__________________________________________________________
+
+'filter out CashUpload Customer vs House
+   
+    
+    Dim DebitTab As Worksheet: Set DebitTab = WireTemplate.Sheets("Debit Sweep")
+    
+    wbCashUpload.Activate
+    
+    Range("H2").AutoFill Destination:=Range("H2:H" & NewLastRow)
+    
+    'make sure to exit sub if N/A is detected
+    
+    Dim visibleTotal As Double
+    Dim cashUploadRng As Range
+    Dim x As Double
+    
+    x = 1 / 100
+    
+    Set cashUploadRng = Range("G:G")
+    
+    
+    With Range("E1:H" & NewLastRow)
+        .AutoFilter 1, Criteria1:="TDA"
+        .AutoFilter 4, Criteria1:="C"
+    End With
+    
+    visibleTotal = Application.WorksheetFunction.Sum(cashUploadRng.SpecialCells(xlCellTypeVisible))
+    DebitTab.Range("B5").Value = visibleTotal * x
+    
+    
+    
+    With Range("E1:H" & NewLastRow)
+        .AutoFilter 1, Criteria1:="TDA"
+        .AutoFilter 4, Criteria1:="H"
+    End With
+    
+    visibleTotal = Application.WorksheetFunction.Sum(cashUploadRng.SpecialCells(xlCellTypeVisible))
+    DebitTab.Range("B6").Value = visibleTotal * x
+    
+    
+    
+    With Range("E1:H" & NewLastRow)
+        .AutoFilter 1, Criteria1:="TDI"
+        .AutoFilter 4, Criteria1:="C"
+    End With
+    
+    visibleTotal = Application.WorksheetFunction.Sum(cashUploadRng.SpecialCells(xlCellTypeVisible))
+    DebitTab.Range("B7").Value = visibleTotal * x
+    
+    
+    
+    With Range("E1:H" & NewLastRow)
+        .AutoFilter 1, Criteria1:="TDI"
+        .AutoFilter 4, Criteria1:="H"
+    End With
+    
+    visibleTotal = Application.WorksheetFunction.Sum(cashUploadRng.SpecialCells(xlCellTypeVisible))
+    DebitTab.Range("B8").Value = visibleTotal * x
+    
+    
+    
+    With Range("E1:H" & NewLastRow)
+        .AutoFilter 1, Criteria1:="5GT"
+        .AutoFilter 4, Criteria1:="C"
+    End With
+    
+    visibleTotal = Application.WorksheetFunction.Sum(cashUploadRng.SpecialCells(xlCellTypeVisible))
+    DebitTab.Range("B11").Value = visibleTotal * x
+    
+    
+    
+    With Range("E1:H" & NewLastRow)
+        .AutoFilter 1, Criteria1:="5GT"
+        .AutoFilter 4, Criteria1:="H"
+    End With
+    
+    visibleTotal = Application.WorksheetFunction.Sum(cashUploadRng.SpecialCells(xlCellTypeVisible))
+    DebitTab.Range("B12").Value = visibleTotal * x
+    
+    
+    
+    With Range("E1:H" & NewLastRow)
+        .AutoFilter 1, Criteria1:="8HK"
+        .AutoFilter 4, Criteria1:="C"
+    End With
+    
+    visibleTotal = Application.WorksheetFunction.Sum(cashUploadRng.SpecialCells(xlCellTypeVisible))
+    DebitTab.Range("B9").Value = visibleTotal * x
+    
+    
+    
+    With Range("E1:H" & NewLastRow)
+        .AutoFilter 1, Criteria1:="8HK"
+        .AutoFilter 4, Criteria1:="H"
+    End With
+    
+    visibleTotal = Application.WorksheetFunction.Sum(cashUploadRng.SpecialCells(xlCellTypeVisible))
+    DebitTab.Range("B10").Value = visibleTotal * x
+    
+    wbCashUpload.Close savechanges:=False
+'_______________________________________________________________
+
+'BOS 995007140 Credit
+
+    
+     Set wbBOS7140 = Application.Workbooks.Open("U:\FuturesClearing\Wire Reports\995007140\bos_sweeps_to_brokerage_and_futures_995007140_" & bosDate & ".xlsx")
+    
+    
+    'If Weekday(Now(), vbMonday) = 1 Then
+    
+        'Set wbBOS7140 = Application.Workbooks.Open("U:\FuturesClearing\Wires\Futures Wires Email Templates\Morning Wires\BOS7140 " & mondayDate4 & ".csv")
+    'Else
+        
+        'Set wbBOS7140 = Application.Workbooks.Open("U:\FuturesClearing\Wires\Futures Wires Email Templates\Morning Wires\BOS7140 " & mydate4 & ".csv")
+    'End If
+    
+    
+    If UCase(Range("D10").Value) <> "JNFI" Or UCase(Range("K1").Value) <> "AMOUNT" Then
+        
+        MsgBox "Cannot Continue: BOS 995007140 Report Reformatted", vbCritical, "Error"
+        Exit Sub
+    
+    End If
+    
+
+    Dim lastrowBOS7140 As Long
+    Dim Total7140 As Double
+    Dim rng7140 As Range
+    
+    Set rng7140 = Range("K:K")
+
+    lastrowBOS7140 = Range("K" & Rows.Count).End(xlUp).Row
+    
+    For i = lastrowBOS7140 To 1 Step -1
+    
+        If Range("K" & i) < 0 Then Rows(i).Delete
+        
+    Next
+
+    Total7140 = Application.WorksheetFunction.Sum(rng7140.SpecialCells(xlCellTypeVisible))
+    
+    WireTemplate.Sheets("Auto Sweep").Range("B4").Value = Total7140
+    
+    wbBOS7140.Close savechanges:=False
+    
+'___________________________________________________________
+
+'BOS 995007143 Debit
+    
+
+    Dim Total7143 As Double
+    Dim rng7143 As Range
+
+    Set wbBOS7143 = Application.Workbooks.Open("U:\FuturesClearing\Wire Reports\995007143\bos_sweeps_to_brokerage_and_futures_995007143_" & bosDate & ".xlsx")
+    
+    
+    If UCase(Range("D10").Value) <> "JNFO" Or UCase(Range("K1").Value) <> "AMOUNT" Then
+        
+        MsgBox "Cannot Continue: BOS 995007140 Report Reformatted", vbCritical, "Error"
+        Exit Sub
+    
+    End If
+    
+    
+    Set rng7143 = Range("K:K")
+    
+    Total7143 = Application.WorksheetFunction.Sum(rng7143.SpecialCells(xlCellTypeVisible))
+    
+    WireTemplate.Sheets("Debit Sweep").Range("B4").Value = Total7143
+    
+    wbBOS7143.Close savechanges:=False
+        
+    
+'________________________________________________________
+
+'Futures Daily Report
+    
+    If Weekday(Now(), vbMonday) = 1 Then
+    
+        Set wbFuturesDaily = Application.Workbooks.Open("U:\FuturesClearing\Wire Reports\Futures_Daily_Report_New\Futures_Daily_Report_New _" & bosDate - 2 & ".xls")
+    
+    Else
+        Set wbFuturesDaily = Application.Workbooks.Open("U:\FuturesClearing\Wire Reports\Futures_Daily_Report_New\Futures_Daily_Report_New _" & bosDate & ".xls")
+    
+    End If
+    
+    Dim Sheet4 As Worksheet: Set Sheet4 = wbFuturesDaily.Sheets(4)
+    Dim Sheet5 As Worksheet: Set Sheet5 = wbFuturesDaily.Sheets(5)
+    Dim Sheet7 As Worksheet: Set Sheet7 = wbFuturesDaily.Sheets(7)
+    
+    
+    Dim AutoSweepTab As Worksheet: Set AutoSweepTab = WireTemplate.Sheets("Auto Sweep")
+    
+    Sheet4.Activate
+    
+    If UCase(Sheet4.Range("B2").Value) <> "TDA - CUSTOMER" Or UCase(Sheet4.Range("C2").Value) <> "TDA - HOUSE" Or UCase(Sheet4.Range("D2").Value) <> "TDI - CUSTOMER" Or _
+        UCase(Sheet4.Range("E2").Value) <> "TDI - HOUSE" Or UCase(Sheet4.Range("A17").Value) <> "SWEEP AMOUNT" Then
+        
+        ' UCase(Sheet4.Range("A2").Value) <> mydate3
+            
+            MsgBox "Cannot Continue: Futures Daily Report (Sheet 4) Reformatted", vbCritical, "Error"
+            Exit Sub
+                   
+    Else
+    
+            AutoSweepTab.Range("B5").Value = Sheet4.Range("B17").Value
+            AutoSweepTab.Range("B6").Value = Sheet4.Range("C17").Value
+            AutoSweepTab.Range("B7").Value = Sheet4.Range("D17").Value
+            AutoSweepTab.Range("B8").Value = Sheet4.Range("E17").Value
+    End If
+    
+    
+    Sheet5.Activate
+    
+    If UCase(Sheet5.Range("B2").Value) <> "5GT - CUSTOMER" Or UCase(Sheet5.Range("C2").Value) <> "5GT - HOUSE" Or UCase(Sheet5.Range("A17").Value) <> "SWEEP AMOUNT" _
+        Then
+        ' Or UCase(Sheet5.Range("A2").Value) <> mydate3
+        
+            MsgBox "Cannot Continue: Futures Daily Report (Sheet 5) Reformatted", vbCritical, "Error"
+            Exit Sub
+                   
+    Else
+            AutoSweepTab.Range("B11").Value = Sheet5.Range("B17").Value
+            AutoSweepTab.Range("B12").Value = Sheet5.Range("C17").Value
+    
+    End If
+    
+    
+    Sheet7.Activate
+    
+    If UCase(Sheet7.Range("B1").Value) <> "8HK - CUSTOMER" Or UCase(Sheet7.Range("C1").Value) <> "8HK - HOUSE" Or UCase(Sheet7.Range("A15").Value) <> "SWEEP AMOUNT" _
+        Then
+           'UCase(Sheet7.Range("A1").Value) <> mydate3
+           
+            MsgBox "Cannot Continue: Futures Daily Report (Sheet 7) Reformatted", vbCritical, "Error"
+            Exit Sub
+            
+    Else
+    
+            AutoSweepTab.Range("B9").Value = Sheet7.Range("B15").Value
+            AutoSweepTab.Range("B10").Value = Sheet7.Range("C15").Value
+    End If
+    
+    wbFuturesDaily.Close savechanges:=False
+     
+    
+ '________________________________________________
+ 
+ 'ADMIS (Investor Services) Report
+
+ 
+    If Weekday(Now(), vbMonday) = 1 Then
+        Set ADMIS = Workbooks.Open("U:\FuturesClearing\ADM Reports\" & mondayDate5 & ".adatfulmny" & ".csv")
+    Else
+        Set ADMIS = Workbooks.Open("U:\FuturesClearing\ADM Reports\" & mydate5 & ".adatfulmny" & ".csv")
+    End If
+        
+     
+    Cells.Select
+    Selection.AutoFilter
+    ActiveSheet.Range("$A$1:$GG$25").AutoFilter Field:=5, Criteria1:="9Z"
+        
+        
+    If UCase(Trim(Range("C1").Value)) <> "MOFFIC" Or UCase(Trim(Range("E1").Value)) <> "MATYPE" Or UCase(Trim(Range("CP1").Value)) <> "MTE" Or UCase(Trim(Range("AX1").Value)) <> "MFMR" Then
+        MsgBox "Cannnot Continue: Columns in ADMIS Report Rearranged", vbCritical, "Reformatting Error"
+        Exit Sub
+    End If
+    
+    
+    If UCase(Cells(3, 3).Value) = "TDE" And Cells(3, 4).Value = "10000" And Cells(3, 5).Value = "9Z" Then
+    
+        WireTemplate.Sheets("Omnibus Requirement").Range("B3").Value = ADMIS.Sheets(1).Range("CP3").Value
+            
+    
+    Else
+        MsgBox "Cannot Continue: TDE 10000 Reformatted", vbCritical, "ADMIS Report Reformatted"
+        Exit Sub
+
+    End If
+
+
+
+    If UCase(Cells(6, 3).Value) = "TDE" And Cells(6, 4).Value = "10010" And Cells(6, 5).Value = "9Z" Then
+    
+        WireTemplate.Sheets("Omnibus Requirement").Range("B10").Value = ADMIS.Sheets(1).Range("CP6").Value
+    
+    Else
+        MsgBox "Cannot Continue: TDE 10010 Reformatted", vbCritical, "ADMIS Report Reformatted"
+        Exit Sub
+            
+    End If
+    
+     
+    
+    If UCase(Cells(9, 3).Value) = "TDE" And Cells(9, 4).Value = "10020" And Cells(9, 5).Value = "9Z" Then
+    
+        WireTemplate.Sheets("Omnibus Requirement").Range("B17").Value = ADMIS.Sheets(1).Range("CP9").Value
+            
+    Else
+        MsgBox "Cannot Continue: TDE 10020 Reformatted", vbCritical, "ADMIS Report Reformatted"
+        Exit Sub
+            
+    End If
+            
+    
+    
+    WireTemplate.Sheets("Omnibus Requirement").Range("B4").Value = ADMIS.Sheets(1).Range("AX3").Value
+    WireTemplate.Sheets("Omnibus Requirement").Range("B11").Value = ADMIS.Sheets(1).Range("AX6").Value
+    WireTemplate.Sheets("Omnibus Requirement").Range("B18").Value = ADMIS.Sheets(1).Range("AX9").Value
+            
+            
+    ADMIS.Close savechanges:=False
+    
+'___________________________________________________________
+
+'AACC ABN (Amro LLC)
+
+    If Weekday(Now(), vbMonday) = 1 Then
+        Set FUTBAL = Workbooks.Open("U:\FuturesClearing\GMIreports\FUTBAL_" & mondayDate3 & ".csv")
+    Else
+        Set FUTBAL = Workbooks.Open("U:\FuturesClearing\GMIreports\FUTBAL_" & mydate3 & ".csv")
+    End If
+    
+    
+    Dim TotalEquity As Range: Set TotalEquity = Range("S:S")
+    Dim LiqValue As Range: Set LiqValue = Range("T:T")
+    Dim MMargin As Range: Set MMargin = Range("Y:Y")
+    Dim MarginCol As Range: Set MarginCol = Range("AD:AD")
+    
+    
+    Dim sumTotalEquity As Double
+    Dim sumLiqValue As Double
+    Dim sumMMargin As Double
+    Dim sumMarginCol As Double
+     
+    
+    If UCase(Trim(Range("J1").Value)) <> "ACCOUNT" Or UCase(Trim(Range("S1").Value)) <> "TOTAL EQUITY" Or UCase(Trim(Range("T1").Value)) <> "LIQUIDATING VALUE" _
+        Or UCase(Trim(Range("Y1").Value)) <> "MAINTENANCE MARGIN" Or UCase(Trim(Range("AD1").Value)) <> "MARGIN COLLATERAL VALUE" Then
+        
+            MsgBox "Cannot Continue: AACC FUTBAL Report Reformatted", vbCritical, "Error"
+            Exit Sub
+    End If
+
+
+
+    Columns("J:J").Select
+    Selection.AutoFilter
+    
+    ActiveSheet.Range("J:J").AutoFilter Field:=1, Criteria1:="=23019", _
+        Operator:=xlOr, Criteria2:="=23020"
+    
+  
+    
+    sumLiqValue = Application.WorksheetFunction.Sum(LiqValue.SpecialCells(xlCellTypeVisible))
+    
+    sumMMargin = Application.WorksheetFunction.Sum(MMargin.SpecialCells(xlCellTypeVisible))
+     
+
+    WireTemplate.Sheets("Omnibus Requirement").Range("B38") = sumLiqValue
+    WireTemplate.Sheets("Omnibus Requirement").Range("B39") = sumMMargin
+  
+
+    Columns("J:J").Select
+    Selection.AutoFilter
+    
+    ActiveSheet.Range("J:J").AutoFilter Field:=1, Criteria1:="<>23019", _
+        Operator:=xlAnd, Criteria2:="<>23020"
+
+       
+    
+    sumTotalEquity = Application.WorksheetFunction.Sum(TotalEquity.SpecialCells(xlCellTypeVisible))
+    
+    sumLiqValue = Application.WorksheetFunction.Sum(LiqValue.SpecialCells(xlCellTypeVisible))
+    
+    sumMMargin = Application.WorksheetFunction.Sum(MMargin.SpecialCells(xlCellTypeVisible))
+    
+    sumMarginCol = Application.WorksheetFunction.Sum(MarginCol.SpecialCells(xlCellTypeVisible))
+    
+    
+    WireTemplate.Sheets("Omnibus Requirement").Range("B27") = sumLiqValue
+    WireTemplate.Sheets("Omnibus Requirement").Range("B28") = sumMMargin
+    WireTemplate.Sheets("Omnibus Requirement").Range("B29") = sumMarginCol
+    WireTemplate.Sheets("Omnibus Requirement").Range("B33") = sumTotalEquity
+    
+    
+    FUTBAL.Close savechanges:=False
+    
+'_________________________________________________________
+   
+'Check conditions
+
+    Dim Outlook As Object
+    Dim newEmail As Object
+    Dim xInspect As Object
+    Dim pageEditor As Object
+    Dim openemail As Boolean
+
+    openemail = False
+    
+    WireTemplate.Sheets("Wires").Range("A1").Value = Format(Now(), "MM/DD/YYYY")
+    
+    Dim wsAuto As Worksheet: Set wsAuto = WireTemplate.Sheets("Auto Sweep")
+    Dim wsDebit As Worksheet: Set wsDebit = WireTemplate.Sheets("Debit Sweep")
+
+    
+    
+    If wsAuto.Range("B13").Value = 0 And wsDebit.Range("B14").Value = 0 Then
+    
+        MsgBox "Auto Sweep And Debit Sweep Equal Zero"
+        openemail = True
+        
+    
+    ElseIf wsAuto.Range("B13").Value <> 0 And wsDebit.Range("B14").Value = 0 Then
+    
+        MsgBox "Warning: Auto Sweep does NOT equal zero", vbExclamation, "Cash Break"
+        Exit Sub
+        
+    
+    ElseIf wsAuto.Range("B13").Value = 0 And wsDebit.Range("B14").Value <> 0 Then
+    
+        MsgBox "Warning: Debit Sweep does NOT equal zero", vbExclamation, "Cash Break"
+        Exit Sub
+        
+    Else
+        
+        MsgBox "Warning: Auto Sweep And Debit Sweep do NOT equal zero", vbExclamation, "Cash Breaks"
+        Exit Sub
+        
+    End If
+    
+    
+    Application.ScreenUpdating = True
+    
+    
+    
+    If openemail = True Then
+    
+    Set Outlook = CreateObject("Outlook.Application")
+    Set newEmail = Outlook.CreateItem(0)
+    
+    With newEmail
+    
+        .To = "Nader.Liddawi@tdameritrade.com"
+        .CC = ""
+        .BCC = ""
+        .Subject = "Futures Wires " & Format(Now(), "MM/DD/YYYY") & " - Please Review"
+        .body = ""
+        .display
+        
+        Set xInspect = newEmail.GetInspector
+        Set pageEditor = xInspect.WordEditor
+        
+        Sheets("Wires").Range("A1:J30").Select
+        
+        Selection.Copy
+        
+        pageEditor.Application.Selection.Start = Len(.body)
+        pageEditor.Application.Selection.End = pageEditor.Application.Selection.Start
+        pageEditor.Application.Selection.PasteAndFormat (wdFormatPlainText)
+        .display
+        Set pageEditor = Nothing
+        Set xInspect = Nothing
+        
+    End With
+    
+    Set newEmail = Nothing
+    Set Outlook = Nothing
+    
+    Call Web_Scraping
+    
+    End If
+    
+    Application.CutCopyMode = False
+ 
+    
+    
+    
+
+End Sub
+
+
+
+
+'Microsoft's internet controls and html object library enabled in reference
+
+Sub Web_Scraping()
+
+   ' On Error GoTo Tdot
+    
+    Dim i As SHDocVw.InternetExplorer
+    Set i = New InternetExplorer
+    
+    i.Visible = True
+    
+    i.navigate ("https://singlepoint.usbank.com/cs70_banking/logon/sbuser")
+    
+    Do While i.readyState <> READYSTATE_COMPLETE
+    
+    Loop
+    
+    Dim idoc As MSHTML.HTMLDocument
+    
+    Set idoc = i.document
+    
+    idoc.all.companyID.Value = "TDAMER"
+    idoc.all.j_username.Value = "NLIDDAWI"
+    idoc.all.j_password.Value = "swineburne34"
+    
+    Dim ele As MSHTML.IHTMLElement
+    
+    Dim eles As MSHTML.IHTMLElementCollection
+    Set eles = idoc.getElementsByTagName("input")
+    
+    For Each ele In eles
+    
+        If ele.Name = "submit_logon" Then
+            ele.Click
+        Else
+        End If
+        
+    Next ele
+    
+   ' Do While i.readyState <> READYSTATE_COMPLETE
+    
+   ' Loop
+    
+    'i.navigate ("https://singlepoint.usbank.com/cs70_banking/sbb/banking/common/CDBalReport")
+    
+    
+'Tdot:
+        'MsgBox "Your US Bank SinglePoint password may have changed"
+       ' Exit Sub
+    
+End Sub
+
+
