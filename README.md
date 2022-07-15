@@ -1,2 +1,2 @@
 # TD-Ameritrade
-Just some of the VBA code I developed to automate manual tasks at TD Ameritrade - Futures and Forex desk [2019]
+Some of the code I developed for fun
